@@ -8,6 +8,12 @@
     "icon": "./assets/icons/app-Icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/5df333b5-c509-41bb-88e1-ba73fc172d6e"
+    },
     "splash": {
       "image": "./assets/icons/app-Icon.png",
       "resizeMode": "contain",
@@ -32,6 +38,7 @@
         "projectId": "5df333b5-c509-41bb-88e1-ba73fc172d6e"
       }
     },
-    "owner": "allen19x"
+    "owner": "allen19x",
+    "runtimeVersion": "1.0.0"
   }
 }

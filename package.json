@@ -1,7 +1,7 @@
 {
   "name": "lahelu",
   "main": "index.tsx",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -10,7 +10,9 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "publish": "eas build --platform android && eas update"
+    "publish": "eas build --platform android && eas update",
+    "build:apk:preview": "eas build --platform android --profile preview",
+    "build:apk:prod": "eas build --platform android --profile prod"
   },
   "jest": {
     "preset": "jest-expo"
