@@ -18,11 +18,13 @@ const App = () => {
       const update = await Updates.checkForUpdateAsync();
       if (update.isAvailable) {
         setIsUpdateAvailable(true);
+        setIsCheckingForUpdate(false)
       } else {
         setIsCheckingForUpdate(false);
       }
     } catch (e) {
       console.error('Error checking for updates:', e);
+    } finally {
       setIsCheckingForUpdate(false);
     }
   };
@@ -35,6 +37,7 @@ const App = () => {
     } catch (e) {
       console.error('Error applying update:', e);
       setIsUpdating(false);
+    } finally {
       setIsCheckingForUpdate(false);
     }
   };
@@ -46,7 +49,7 @@ const App = () => {
   if (isCheckingForUpdate) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#05b569" />
         <Text style={styles.checkForUpdateText}>Checking for updates...</Text>
       </View>
     );
@@ -57,9 +60,9 @@ const App = () => {
       <View style={styles.centered}>
         <Text style={styles.updateAvailText}>An update is available!</Text>
         {isUpdating ? (
-          <ActivityIndicator size="small" color="#0000ff" />
+          <ActivityIndicator size="small" color="#05b569" />
         ) : (
-          <Button color="#0000ff" title="Restart to Update" onPress={applyUpdate} />
+          <Button color="#05b569" title="Restart to Update" onPress={applyUpdate} />
         )}
       </View>
     );
@@ -76,6 +79,7 @@ const App = () => {
 
 const styles = StyleSheet.create({
   centered: {
+    backgroundColor: 'black',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -92,11 +96,11 @@ const styles = StyleSheet.create({
   },
   checkForUpdateText: {
     marginTop: 20,
-    color: '#0000ff',
+    color: '#05b569',
   },
   updateAvailText: {
     marginBottom: 20,
-    color: '#0000ff',
+    color: '#05b569',
   },
 });
 
