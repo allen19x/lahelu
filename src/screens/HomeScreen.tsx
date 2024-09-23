@@ -211,7 +211,7 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <HeaderHome activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* <HeaderHome activeTab={activeTab} setActiveTab={setActiveTab} /> */}
       <FlashList
         refreshControl={(
           <RefreshControl

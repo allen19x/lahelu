@@ -9,18 +9,17 @@ import RootNavigation from './navigation';
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [isCheckingForUpdate, setIsCheckingForUpdate] = useState(false);
+  const [isCheckingForUpdate, setIsCheckingForUpdate] = useState(true);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const checkForUpdates = async () => {
     try {
-      setIsCheckingForUpdate(true);
       const update = await Updates.checkForUpdateAsync();
-      setIsCheckingForUpdate(false);
-
       if (update.isAvailable) {
-        setIsUpdateAvailable(true);  // Mark that an update is available
+        setIsUpdateAvailable(true);
+      } else {
+        setIsCheckingForUpdate(false);
       }
     } catch (e) {
       console.error('Error checking for updates:', e);
@@ -32,38 +31,43 @@ const App = () => {
     try {
       setIsUpdating(true);
       await Updates.fetchUpdateAsync();
-      // Apply the update and restart the app
       Updates.reloadAsync();
     } catch (e) {
       console.error('Error applying update:', e);
       setIsUpdating(false);
+      setIsCheckingForUpdate(false);
     }
   };
 
   useEffect(() => {
-    checkForUpdates();  // Check for updates when the app starts
+    checkForUpdates();
   }, []);
+
+  if (isCheckingForUpdate) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.checkForUpdateText}>Checking for updates...</Text>
+      </View>
+    );
+  }
+
+  if (isUpdateAvailable) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.updateAvailText}>An update is available!</Text>
+        {isUpdating ? (
+          <ActivityIndicator size="small" color="#0000ff" />
+        ) : (
+          <Button color="#0000ff" title="Restart to Update" onPress={applyUpdate} />
+        )}
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        {/* If update is available, show notification */}
-        {isCheckingForUpdate ? (
-          <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#0000ff" />
-            <Text>Checking for updates...</Text>
-          </View>
-        ) : isUpdateAvailable ? (
-          <View style={styles.updateBanner}>
-            <Text>An update is available!</Text>
-            {isUpdating ? (
-              <ActivityIndicator size="small" color="#00ff00" />
-            ) : (
-              <Button title="Restart to Update" onPress={applyUpdate} />
-            )}
-          </View>
-        ) : null}
-
         <RootNavigation />
       </QueryClientProvider>
     </GestureHandlerRootView>
@@ -72,10 +76,7 @@ const App = () => {
 
 const styles = StyleSheet.create({
   centered: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -88,6 +89,14 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  checkForUpdateText: {
+    marginTop: 20,
+    color: '#0000ff',
+  },
+  updateAvailText: {
+    marginBottom: 20,
+    color: '#0000ff',
   },
 });
 
