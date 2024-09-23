@@ -1,7 +1,7 @@
 {
   "name": "lahelu",
   "main": "index.tsx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "publish": "eas build --platform android && eas update"
   },
   "jest": {
     "preset": "jest-expo"
@@ -22,6 +23,7 @@
     "@shopify/flash-list": "1.6.4",
     "@tanstack/react-query": "^5.56.2",
     "axios": "^1.7.7",
+    "eas-cli": "^12.4.1",
     "expo": "~51.0.28",
     "expo-av": "^14.0.7",
     "expo-constants": "~16.0.2",
@@ -31,6 +33,7 @@
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
+    "expo-updates": "^0.25.25",
     "expo-web-browser": "~13.0.3",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
@@ -56,5 +59,5 @@
     "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3"
   },
-  "private": true
+  "private": false
 }
