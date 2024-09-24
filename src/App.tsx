@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, Button, ActivityIndicator, StyleSheet, StatusBar } from 'react-native';
 import * as Updates from 'expo-updates';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import RootNavigation from './navigation';
+import colorScheme from '@/assets/themes/colorScheme';
 
 const queryClient = new QueryClient();
 
@@ -49,7 +50,7 @@ const App = () => {
   if (isCheckingForUpdate) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#05b569" />
+        <ActivityIndicator size="large" color={colorScheme.$primaryBlueColor} />
         <Text style={styles.checkForUpdateText}>Checking for updates...</Text>
       </View>
     );
@@ -60,9 +61,9 @@ const App = () => {
       <View style={styles.centered}>
         <Text style={styles.updateAvailText}>An update is available!</Text>
         {isUpdating ? (
-          <ActivityIndicator size="small" color="#05b569" />
+          <ActivityIndicator size="small" color={colorScheme.$primaryBlueColor} />
         ) : (
-          <Button color="#05b569" title="Restart to Update" onPress={applyUpdate} />
+          <Button color={colorScheme.$primaryBlueColor} title="Restart to Update" onPress={applyUpdate} />
         )}
       </View>
     );
@@ -70,6 +71,11 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colorScheme.$blackBg}
+        translucent={false}
+      />
       <QueryClientProvider client={queryClient}>
         <RootNavigation />
       </QueryClientProvider>
@@ -84,23 +90,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  updateBanner: {
-    position: 'absolute',
-    top: 20,
-    left: 0,
-    right: 0,
-    backgroundColor: '#f0ad4e',
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   checkForUpdateText: {
     marginTop: 20,
-    color: '#05b569',
+    color: colorScheme.$primaryBlueColor,
   },
   updateAvailText: {
     marginBottom: 20,
-    color: '#05b569',
+    color: colorScheme.$primaryBlueColor,
   },
 });
 

@@ -1,7 +1,7 @@
 import { createNavigationContainerRef, DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '@/src/screens/HomeScreen';
 import { HOME_SCREEN } from '@/src/constants/RootKey';
+import HomeScreen from '@/src/screens/HomeScreen/HomeScreen';
 
 export const navigationRef = createNavigationContainerRef()
 
