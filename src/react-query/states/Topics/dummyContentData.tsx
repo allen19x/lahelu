@@ -1,6 +1,6 @@
-import { ModelCommunityContent } from "@/src/Models/CommunityModel";
+import { ModelTopicsContent } from "@/src/Models/TopicsModel";
 
-export const dummyCommunityData: ModelCommunityContent[] = [
+export const dummyTopicsData: ModelTopicsContent[] = [
     {
         id: '1',
         name: "FNAL (Five Nights At Lahelu's)",

@@ -34,7 +34,6 @@ export interface ModelVideoRef {
   isMuted: boolean;
   status: AVPlaybackStatusSuccess | null;
 }
-
 export interface MemeItemProps {
   item: ModelHomeContent;
   isMuted: boolean;

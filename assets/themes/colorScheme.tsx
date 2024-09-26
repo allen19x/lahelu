@@ -1,6 +1,7 @@
 const colorScheme = {
     $white: '#ffffff',
     $whiteCream: '#e4e4e4',
+    $gray: '#a6a6a6',
     $orangeShade: '#de952b',
     $lightGreen: '#00ff00',
     $darkBlackBg: '#0c0c0c',

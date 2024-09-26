@@ -1,4 +1,4 @@
-export interface ModelCommunityContent {
+export interface ModelTopicsContent {
   id: string;
   name: string;
   desc: string;

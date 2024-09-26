@@ -11,8 +11,9 @@ import { Video, ResizeMode } from 'expo-av';
 import { Image } from 'expo-image';
 import { Ionicons, FontAwesome6, Feather } from '@expo/vector-icons';
 
-import { MemeItemProps } from '../../Models/HomeModel';
+import { MemeItemProps } from '../../../Models/HomeModel';
 import colorScheme from '@/assets/themes/colorScheme';
+import { getRelativeTime } from '@/src/utils/GlobalFunction';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -44,7 +45,12 @@ const MemeItem: React.FC<MemeItemProps> = ({
                 <Image source={{ uri: item.avatarProfile }} style={styles.avatar} />
                 <View style={styles.headerUsernameTextContainer}>
                     <Text style={styles.title}>{item.username}</Text>
+                    <Text style={styles.dot}>•</Text>
+                    <Text style={styles.timestamp}>{getRelativeTime(item.postTime)}</Text>
                 </View>
+                <TouchableOpacity>
+                    <Ionicons name="ellipsis-horizontal" size={20} color="white" />
+                </TouchableOpacity>
             </View>
             <View style={styles.headerTitleTextContainer}>
                 <Text style={styles.title}>{item.title}</Text>
@@ -86,20 +92,20 @@ const MemeItem: React.FC<MemeItemProps> = ({
                 horizontal
                 nestedScrollEnabled
                 style={styles.hashtagsContainer}>
-                <View style={styles.hashtagSawerContainer}>
+                <TouchableOpacity style={styles.hashtagSawerContainer}>
                     <View style={styles.hashtagSawerIcon}>
                         <Ionicons name="logo-usd" size={8} color={colorScheme.$orangeShade} />
                     </View>
                     <Text style={styles.hashtag}>
                         Sawer
                     </Text>
-                </View>
+                </TouchableOpacity>
                 {item.hashtags.map((tag, index) => (
-                    <View key={`${tag}${index}`} style={styles.hashtagNormalContainer}>
+                    <TouchableOpacity key={`${tag}${index}`} style={styles.hashtagNormalContainer}>
                         <Text style={styles.hashtag}>
                             #  {tag}
                         </Text>
-                    </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
 
@@ -171,6 +177,8 @@ const styles = StyleSheet.create({
     },
     headerUsernameTextContainer: {
         flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center'
     },
     headerTitleTextContainer: {
         flex: 1,
@@ -180,6 +188,15 @@ const styles = StyleSheet.create({
         color: colorScheme.$whiteCream,
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    dot: {
+        color: colorScheme.$gray,
+        fontSize: 8,
+        marginHorizontal: 4
+    },
+    timestamp: {
+        color: colorScheme.$gray,
+        fontSize: 10,
     },
     hashtagsContainer: {
         paddingVertical: 10,
@@ -270,7 +287,7 @@ const styles = StyleSheet.create({
     },
     commentButton: {
         marginLeft: 12,
-        height: 44,
+        height: 40,
         padding: 10,
         borderRadius: 10,
         borderWidth: 1,

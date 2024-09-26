@@ -4,10 +4,12 @@ import {
   Text,
   Dimensions,
   ActivityIndicator,
-  StyleSheet,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { RefreshControl } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { FlashList, ViewToken } from '@shopify/flash-list';
@@ -15,13 +17,18 @@ import { Video, AVPlaybackStatusSuccess, AVPlaybackStatus } from 'expo-av';
 import moment from 'moment';
 import _ from 'lodash';
 
-import { ModelHomeContent, ModelVideoRef } from '../../Models/HomeModel';
-import MemeContentItem from './MemeContentItem';
+import { ModelHomeContent, ModelVideoRef } from '@/src/Models/HomeModel';
+import { BottomTabParamList } from '@/src/Models/CustomModel';
+import MemeContentItem from './Component/MemeContentItem';
 import CustomMainHeader from '../../components/CustomMainHeader';
 
 import { fetchHomeContentData } from '../../react-query/states/Home/apiServices';
+import { fetchActiveTab, updateActiveTab } from '@/src/react-query/states/Drawer';
 import useCustomLoader from '../../react-query/hooks/useCustomLoader';
 import colorScheme from '@/assets/themes/colorScheme';
+import styles from './styles';
+
+type BottomTabProp = BottomTabNavigationProp<BottomTabParamList, 'HomeScreen'>;
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -30,12 +37,32 @@ const horizontalHeight = screenWidth * (16 / 9 / 2.5);
 const estimatedItemSize = (verticalHeight + horizontalHeight) / 2;
 
 const HomeScreen = () => {
+  // React Query
+  const { data: activeTab } = useQuery<string>({
+    queryKey: ['activeTab'],
+    queryFn: fetchActiveTab,
+  });
+  const currentActiveTab: string = activeTab || 'Home';
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: updateActiveTab,
+    onSuccess: (newTab) => {
+      queryClient.setQueryData(['activeTab'], newTab);
+    },
+  });
+  const handleTabChange = (newTab: string) => {
+    mutation.mutate(newTab);
+  };
+  // End React Query
+  const isFocused = useIsFocused()
+  const navigation = useNavigation<BottomTabProp>()
   const [page, setPage] = useState(1)
   const [isMuted, setIsMuted] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [visibleVideoId, setVisibleVideoId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('Home');
-  const [isTabClicked, setIsTabClicked] = useState(false);
+
+  const [listMeme, setListMeme] = useState<ModelHomeContent[]>([]);
+
   const tabList = [
     {
       id: 1,
@@ -65,11 +92,19 @@ const HomeScreen = () => {
 
   const { data: memeData, loading: isLoadingMemeData, error, fetch, reFetch } = useCustomLoader<ModelHomeContent[], { page: number, date: number, activeTab: string }>({
     fetchFunction: fetchHomeContentData,
-    params: { page, date: moment.now(), activeTab },
+    params: { page, date: moment.now(), activeTab: currentActiveTab },
     options: { fetchOnLoad: true },
   });
 
-  const [listMeme, setListMeme] = useState<ModelHomeContent[]>([]);
+  useEffect(() => {
+    const unsubscribeTabPress = navigation.addListener('tabPress', () => {
+      memeRef.current?.scrollToOffset({ animated: true, offset: 0 });
+    });
+
+    return () => {
+      unsubscribeTabPress();
+    };
+  }, [navigation]);
 
   useEffect(() => {
     if (memeData && memeData.length > 0) {
@@ -85,26 +120,28 @@ const HomeScreen = () => {
   }, [memeData]);
 
   useEffect(() => {
-    if (isTabClicked) {
+    if (isFocused) {
       memeRef.current?.scrollToOffset({ animated: true, offset: 0 });
       setPage(1)
       setIsRefreshing(true)
-      reFetch({ page: 1, date: moment.now(), activeTab });
-      setIsTabClicked(false)
+      reFetch({ page: 1, date: moment.now(), activeTab: currentActiveTab });
     }
-  }, [activeTab, isTabClicked]);
+    else if (!isFocused) {
+      setVisibleVideoId(null)
+    }
+  }, [currentActiveTab, isFocused]);
 
   const fetchMoreMemeData = async () => {
     if (!isLoadingMemeData) {
       setPage((prevPage) => prevPage + 1);
-      fetch({ page: page + 1, date: moment.now(), activeTab });
+      fetch({ page: page + 1, date: moment.now(), activeTab: currentActiveTab });
     }
   };
 
   const handlePullToRefreshMeme = () => {
     setIsRefreshing(true)
     setPage(1)
-    reFetch({ page: 1, date: moment.now(), activeTab });
+    reFetch({ page: 1, date: moment.now(), activeTab: currentActiveTab });
   };
 
   const throttledSetVisibleVideoId = useCallback(
@@ -214,7 +251,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.headerScreenAnimatedWrapper, animatedHeaderStyle]}>
-        <CustomMainHeader activeTab={activeTab} setActiveTab={setActiveTab} setIsTabClicked={setIsTabClicked} tabList={tabList} />
+        <CustomMainHeader activeTab={currentActiveTab} setActiveTab={handleTabChange} setIsTabClicked={() => { }} tabList={tabList} />
       </Animated.View>
       <FlashList
         removeClippedSubviews
@@ -246,182 +283,5 @@ const HomeScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colorScheme.$blackBg,
-    paddingVertical: 10,
-  },
-  centered: {
-    backgroundColor: colorScheme.$blackBg,
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  containerItem: {
-    marginVertical: 12,
-    paddingTop: 10,
-    paddingHorizontal: 10,
-    alignSelf: 'center',
-  },
-  headerScreenAnimatedWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 999
-  },
-  flashlistContainer: {
-    paddingTop: 80
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  headerUsernameTextContainer: {
-    flex: 1,
-  },
-  headerTitleTextContainer: {
-    flex: 1,
-    paddingBottom: 10,
-  },
-  title: {
-    color: colorScheme.$whiteCream,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  hashtagsContainer: {
-    paddingVertical: 10,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  hashtagSawerContainer: {
-    flexDirection: 'row',
-    backgroundColor: colorScheme.$orangeShade,
-    paddingVertical: 2,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 5,
-  },
-  hashtagSawerIcon: {
-    padding: 2,
-    borderRadius: 8,
-    backgroundColor: colorScheme.$whiteCream,
-    marginRight: 8,
-  },
-  hashtagNormalContainer: {
-    textAlign: 'center',
-    paddingVertical: 2,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colorScheme.$whiteCream,
-    marginRight: 5,
-  },
-  hashtag: {
-    fontWeight: '500',
-    marginBottom: 1,
-    color: colorScheme.$whiteCream,
-  },
-  containerContent: {
-    backgroundColor: colorScheme.$lightBlackBg,
-    marginHorizontal: -10,
-  },
-  media: {
-    width: '100%',
-    aspectRatio: 1,
-  },
-  videoContainer: {
-    position: 'relative',
-  },
-  muteButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-    opacity: 0.8,
-    backgroundColor: colorScheme.$blackBg,
-    padding: 4,
-    borderRadius: 20,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  footerLeftContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  voteContainer: {
-    height: 40,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colorScheme.$mediumBlackBg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colorScheme.$blackBg,
-  },
-  voteSeparator: {
-    height: 40,
-    margin: -10,
-    width: 1,
-    backgroundColor: colorScheme.$mediumBlackBg,
-    marginHorizontal: 10,
-  },
-  voteCount: {
-    color: colorScheme.$whiteCream,
-    fontSize: 14,
-    marginHorizontal: 5,
-  },
-  commentButton: {
-    marginLeft: 12,
-    height: 44,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    backgroundColor: colorScheme.$blackBg,
-    borderColor: colorScheme.$mediumBlackBg,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  commentCount: {
-    color: colorScheme.$whiteCream,
-    fontSize: 14,
-    marginLeft: 5,
-  },
-  shareButton: {
-    height: 40,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    backgroundColor: colorScheme.$blackBg,
-    borderColor: colorScheme.$mediumBlackBg,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  errorText: {
-    color: colorScheme.$whiteCream,
-  },
-  itemSeparator: {
-    height: 4,
-    backgroundColor: colorScheme.$darkBlackBg,
-  },
-  footerLoader: {
-    paddingTop: 20,
-    paddingBottom: 60
-  },
-});
 
 export default HomeScreen;

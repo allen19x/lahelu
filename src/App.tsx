@@ -24,7 +24,7 @@ const App = () => {
         setIsCheckingForUpdate(false);
       }
     } catch (e) {
-      console.error('Error checking for updates:', e);
+      // console.error('Error checking for updates:', e);
     } finally {
       setIsCheckingForUpdate(false);
     }
@@ -36,7 +36,7 @@ const App = () => {
       await Updates.fetchUpdateAsync();
       Updates.reloadAsync();
     } catch (e) {
-      console.error('Error applying update:', e);
+      // console.error('Error applying update:', e);
       setIsUpdating(false);
     } finally {
       setIsCheckingForUpdate(false);

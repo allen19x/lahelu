@@ -1,8 +1,8 @@
-import { ModelCommunityContent } from "@/src/Models/CommunityModel";
-import { dummyCommunityData } from "./dummyContentData";
+import { ModelTopicsContent } from "@/src/Models/TopicsModel";
+import { dummyTopicsData } from "./dummyContentData";
 
-export const fetchCommunityContentData = async (params: { page: number; date: number; activeTab: string }): Promise<ModelCommunityContent[]> => {
-    return new Promise<ModelCommunityContent[]>((resolve) => {
+export const fetchTopicsContentData = async (params: { page: number; date: number; activeTab: string }): Promise<ModelTopicsContent[]> => {
+    return new Promise<ModelTopicsContent[]>((resolve) => {
         setTimeout(() => {
             const { activeTab, page } = params;
             if (page > 3) {
@@ -10,10 +10,10 @@ export const fetchCommunityContentData = async (params: { page: number; date: nu
                 return;
             }
 
-            let filteredData = dummyCommunityData;
+            let filteredData = dummyTopicsData;
 
             if (activeTab === 'Sudah Gabung') {
-                filteredData = dummyCommunityData.filter((item) => item.isJoined);
+                filteredData = dummyTopicsData.filter((item) => item.isJoined);
             }
 
             let modifiedData = filteredData;
